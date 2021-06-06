@@ -1,14 +1,15 @@
 package exceptions;
 
-public class MaxCapacityException extends ArmyException{
+@SuppressWarnings("serial")
+public class MaxCapacityException extends ArmyException {
 
 	public MaxCapacityException() {
-		super();
+
 	}
 
 	public MaxCapacityException(String s) {
 		super(s);
+
 	}
 
-	
 }

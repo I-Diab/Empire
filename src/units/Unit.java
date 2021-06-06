@@ -1,39 +1,31 @@
 package units;
 
-abstract public class Unit {
+import exceptions.FriendlyFireException;
 
+public abstract class Unit {
 	private int level;
 	private int maxSoldierCount;
 	private int currentSoldierCount;
 	private double idleUpkeep;
 	private double marchingUpkeep;
 	private double siegeUpkeep;
-	
-	public Unit(int level, int maxSoldierCount, double idleUpkeep, double marchingUpkeep,
-			double siegeUpkeep) {
+	private Army parentArmy;
+
+	public Unit(int level, int maxSoldierConunt, double idleUpkeep, double marchingUpkeep, double siegeUpkeep) {
 		this.level = level;
-		this.maxSoldierCount = maxSoldierCount;
+		this.maxSoldierCount = maxSoldierConunt;
+		this.currentSoldierCount = maxSoldierCount;
 		this.idleUpkeep = idleUpkeep;
 		this.marchingUpkeep = marchingUpkeep;
 		this.siegeUpkeep = siegeUpkeep;
-	}
 
-	
-	@Override
-	public String toString() {
-		return "Unit [level=" + level + ", maxSoldierCount=" + maxSoldierCount + ", currentSoldierCount="
-				+ currentSoldierCount + ", idleUpkeep=" + idleUpkeep + ", marchingUpkeep=" + marchingUpkeep
-				+ ", siegeUpkeep=" + siegeUpkeep + "]";
 	}
-
 
 	public int getCurrentSoldierCount() {
 		return currentSoldierCount;
 	}
 
 	public void setCurrentSoldierCount(int currentSoldierCount) {
-		// Should I check if the currentSoldierCount parameter
-		// is smaller than or equal to the maxSoldierCount ?
 		this.currentSoldierCount = currentSoldierCount;
 	}
 
@@ -56,9 +48,32 @@ abstract public class Unit {
 	public double getSiegeUpkeep() {
 		return siegeUpkeep;
 	}
+
+	public Army getParentArmy() {
+		return parentArmy;
+	}
+
+	public void setParentArmy(Army parentArmy) {
+		this.parentArmy = parentArmy;
+	}
 	
+	public void attack(Unit target) throws FriendlyFireException { ////// if it is the first turn to attack the defending army should i change underSiege
+																	// of the attacked city to false ? because if it was sieged and the player decides
+		if (isFriendly(target)) {									// to attack in the 2nd turn of sieging the defending armies will decrease by 10%
+			throw new FriendlyFireException("You can not attack your own army."); // every turn due to the endTurn method.
+		}
+		double factor = this.getFactor(target);
+		if(target.getCurrentSoldierCount() - (int) (factor * this.currentSoldierCount) <=0)
+			target.setCurrentSoldierCount(0);
+		else
+			target.setCurrentSoldierCount(target.getCurrentSoldierCount() - (int) (factor * this.currentSoldierCount));
+		target.getParentArmy().handleAttackedUnit(target);
+	}
 	
-	
-	
+	protected abstract double getFactor(Unit target);
+
+	public boolean isFriendly(Unit target) {
+		return this.parentArmy==target.parentArmy;
+	}
 	
 }
